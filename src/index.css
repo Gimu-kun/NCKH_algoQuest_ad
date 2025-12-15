@@ -1,0 +1,16 @@
+@import "tailwindcss";
+:root {
+  --primary-color:#ffd85f;
+  --secondary-color:#f3e8c7;
+  --third-color:#e4e6e7;
+  --text-default-color:#898989;
+  --text-dark-color:#303030;
+  --text-light-color:#efefef;
+  --block-dark-color: #303030;
+  --block-light-color: #efefef;
+  --block-default-color:#898989;
+}
+
+*{
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
