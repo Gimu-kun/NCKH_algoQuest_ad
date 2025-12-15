@@ -15,7 +15,7 @@ const UserProfileCard: React.FC = () => {
                 </div>
                 <div className="
                     absolute bottom-0 w-full
-                    bg-gradient-to-t from-black to-[transparent]
+                    bg-linear-to-t from-black to-transparent
                     p-5
                 ">
                     <h2 className="text-xl font-bold text-amber-50">Lora Piterson</h2>

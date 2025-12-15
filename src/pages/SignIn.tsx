@@ -9,7 +9,7 @@ import {
   Snackbar,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import authApiService from "../service/apis/authApiService";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
@@ -88,7 +88,7 @@ const SignIn = () => {
   }
 
   return (
-    <section className="p-10 rounded-lg bg-[var(--block-light-color)] shadow-[6px_6px_7px_6px_rgba(0,_0,_0,_0.1)]">
+    <section className="p-10 rounded-lg bg-(--block-light-color) shadow-[6px_6px_7px_6px_rgba(0,0,0,0.1)]">
       <Snackbar
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         open={state.open}
@@ -97,7 +97,7 @@ const SignIn = () => {
       />
       <form onSubmit={handleLogin} className="flex flex-col gap-4">
         <div className="flex justify-center">
-          <h1 className="uppercase text-2xl font-bold bg-gradient-to-r from-slate-400 to-slate-700 bg-clip-text text-transparent">
+          <h1 className="uppercase text-2xl font-bold bg-linear-to-r from-slate-400 to-slate-700 bg-clip-text text-transparent">
             Đăng nhập quản trị viên
           </h1>
         </div>

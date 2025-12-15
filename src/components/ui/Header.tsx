@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Settings, Bell, Search, User, LogOut } from 'lucide-react'; // Sử dụng lucide-react cho icons
+import { Settings, Bell, LogOut } from 'lucide-react'; // Sử dụng lucide-react cho icons
 import { useDispatch } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';

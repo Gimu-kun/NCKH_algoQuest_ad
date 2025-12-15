@@ -135,7 +135,7 @@ const TopicManager = () => {
         <div className="min-h-screen text-gray-800">
             <main className="p-6 md:p-8 lg:p-7">
                 <h1 className="text-4xl font-bold mb-2">Quản lý chủ đề</h1>
-                <div className="flex w-full items-center space-x-8 mb-5 mt-5 text-sm bg-amber-50 mt-2 rounded-xl overflow-hidden">
+                <div className="flex w-full items-center space-x-8 mb-5 mt-5 text-sm bg-amber-50 rounded-xl overflow-hidden">
                     <TableContainer component={Paper}>
                         <Table aria-label="collapsible table">
                             <TableHead>

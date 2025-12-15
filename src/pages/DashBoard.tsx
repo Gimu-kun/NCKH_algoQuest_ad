@@ -16,7 +16,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex w-full items-center space-x-8 mb-5 text-sm">
                     <div className='flex w-1/2  items-center space-x-8'>
                         {['Interviews', 'Hired', 'Project time', 'Output'].map((label, index) => (
-                            <div key={label} className="flex-1 max-w-[150px]">
+                            <div key={label} className="flex-1 max-w-37.5">
                                 <p className="font-semibold mb-1">{label}</p>
                                 <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
                                     <div 

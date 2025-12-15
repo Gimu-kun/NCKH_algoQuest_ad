@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import type { questType } from "../types/questType";
-import {  Box, Button, Chip, Paper, Switch, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Button, Chip, Paper, Switch, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import questApiService from "../service/apis/questApiService";
-import { Tag, TagIcon } from "lucide-react";
-import { TagRounded } from "@mui/icons-material";
 
 function createData(data:questType) {
     return {
@@ -61,7 +59,6 @@ const QuestManager = () => {
                   <TableCell align="left">Thao tác</TableCell>
                 </TableRow>
               </TableHead>
-
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
