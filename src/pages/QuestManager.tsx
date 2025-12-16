@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import type { questType } from "../types/questType";
-import { Button, Chip, Paper, Switch, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Button, Chip, Paper, Stack, Switch, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import questApiService from "../service/apis/questApiService";
+import formatDate from "../service/utils/dataFormat";
 
 function createData(data:questType) {
     return {
@@ -42,20 +43,29 @@ const QuestManager = () => {
   return (
     <div className="min-h-screen text-gray-800">
       <main className="p-6 md:p-8 lg:p-7">
-        <h1 className="text-4xl font-bold mb-2">Quản lý màn chơi</h1>
+        <Stack direction={"row"} justifyContent={"space-between"} sx={{padding:3}}>
+            <h1 className="text-4xl font-bold">Quản lý màn chơi</h1>
+            <Button variant="contained" sx={{fontSize:12}}>
+                Tạo mới
+            </Button>
+        </Stack>
 
         <div className="flex w-full items-center mb-5 mt-5 text-sm bg-amber-50 rounded-xl overflow-hidden">
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>ID chương</TableCell>
-                  <TableCell align="left">Tiêu đề</TableCell>
-                  <TableCell align="left">Mô tả</TableCell>
-                  <TableCell align="left">Trạng thái</TableCell>
-                  <TableCell align="left">Kiểu màn chơi</TableCell>
-                  <TableCell align="left">Thứ tự</TableCell>
+                  <TableCell align="left" sx={{whiteSpace:"nowrap"}}>ID</TableCell>
+                  <TableCell align="left" sx={{whiteSpace:"nowrap"}}>ID chương</TableCell>
+                  <TableCell align="left" sx={{whiteSpace:"nowrap"}}>Tiêu đề</TableCell>
+                  <TableCell align="left" sx={{whiteSpace:"nowrap"}}>Mô tả</TableCell>
+                  <TableCell align="left" sx={{whiteSpace:"nowrap"}}>Trạng thái</TableCell>
+                  <TableCell align="left" sx={{whiteSpace:"nowrap"}}>Kiểu màn chơi</TableCell>
+                  <TableCell align="left" sx={{whiteSpace:"nowrap"}}>Thứ tự</TableCell>
+                  <TableCell align="left" sx={{whiteSpace:"nowrap"}}>Tạo lúc</TableCell>
+                  <TableCell align="left" sx={{whiteSpace:"nowrap"}}>Cập nhật lúc</TableCell>
+                  <TableCell align="left" sx={{whiteSpace:"nowrap"}}>Tạo bởi</TableCell>
+                  <TableCell align="left" sx={{whiteSpace:"nowrap"}}>Cập nhật bởi</TableCell>
                   <TableCell align="left">Thao tác</TableCell>
                 </TableRow>
               </TableHead>
@@ -71,12 +81,14 @@ const QuestManager = () => {
                 ) : (
                   rows.map(row => (
                     <TableRow key={row.id}>
-                      <TableCell>{row.id}</TableCell>
-                      <TableCell>{row.topicId}</TableCell>
+                      <TableCell align="left" sx={{whiteSpace:"nowrap"}}>{row.id}</TableCell>
+                      <TableCell align="left" sx={{whiteSpace:"nowrap"}}>{row.topicId}</TableCell>
                       <TableCell align="left">{row.title}</TableCell>
                       <TableCell align="left">{row.decs}</TableCell>
                       <TableCell align="left">
-                        <Switch checked={row.status} />
+                        <TableCell>
+                            <Chip label={row.status ? "Hoạt động" : "Tạm ngưng"} color={row.status ? "success" : "error"} size="medium" />
+                        </TableCell>
                       </TableCell>
                       <TableCell align="left">
                         <Chip label={row.questType == 'lesson' ? 'Bài học' : 
@@ -87,12 +99,17 @@ const QuestManager = () => {
                           row.questType == 'visualization' ? 'success' : 'error'} size="medium" />
                       </TableCell>
                       <TableCell align="left">{row.orderIndex}</TableCell>
+                      <TableCell>{formatDate(row.createdAt.toString())}</TableCell>
+                      <TableCell>{formatDate(row.updatedAt.toString())}</TableCell>
+                      <TableCell>{row.createBy}</TableCell>
+                      <TableCell>{row.updatedBy}</TableCell>
                       <TableCell align="left">
-                        <Button variant="contained" size="small" sx={{marginLeft:0.5, marginRight:0.5}}>
-                          Chi tiết
+                        <Button sx={{marginBottom:1, fontSize:12, whiteSpace:"nowrap"}} size="small" variant="outlined">
+                            Chi tiết
                         </Button>
-                        <Button variant="outlined" size="small" sx={{marginLeft:0.5, marginRight:0.5}}>
-                          Chỉnh sửa
+                        <br/>
+                        <Button sx={{marginBottom:1, fontSize:12, whiteSpace:"nowrap"}} size="small" variant="contained" color="secondary">
+                            Chỉnh sửa
                         </Button>
                       </TableCell>
                     </TableRow>
