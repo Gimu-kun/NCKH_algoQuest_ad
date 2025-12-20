@@ -11,9 +11,6 @@ const Header: React.FC = () => {
         label:'Bảng điều khiển',
         url:'/main/dashboard'
     },{
-        label:'Thống kê chi tiết',
-        url:'/main/analyzing'
-    },{
         label:'Quản lý người dùng',
         url:'/main/users'
     },{
@@ -22,6 +19,9 @@ const Header: React.FC = () => {
     },{
         label:'Quản lý màn chơi',
         url:'/main/quests'
+    },{
+        label:'Quản lý bài học',
+        url:'/main/lessons'
     },{
         label:'Quản lý câu hỏi',
         url:'/main/questions'

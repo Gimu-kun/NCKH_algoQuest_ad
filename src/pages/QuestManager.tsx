@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { questType } from "../types/questType";
-import { Button, Chip, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Alert, Button, Chip, Paper, Snackbar, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import questApiService from "../service/apis/questApiService";
 import formatDate from "../service/utils/dataFormat";
 import AddQuestModal from "./AddQuestModal";
@@ -8,7 +8,7 @@ import AddQuestModal from "./AddQuestModal";
 function createData(data: questType) {
     return {
         id: data.id,
-        topicId: data.topicId.id,
+        topicId: data?.topicId?.id && "null",
         title: data.title,
         decs: data.description,
         status: data.status,
@@ -54,21 +54,10 @@ const QuestManager = () => {
         setModalOpen(true);
     };
 
-    const fetchQuests = async () => {
-        try {
-            const res = await questApiService.getAll();
-            if (res.success && res.data) {
-                setQuestList(res.data);
-            }
-        } catch {
-            alert("Lỗi khi lấy dữ liệu");
-        }
-    };
-
     const handleCloseModal = (message?: string, success: boolean = true) => {
         setEditingId(null);
         setModalOpen(false);
-        fetchQuests();
+        getQuestList();
 
         if (message) {
             showSnackbar(message, success ? "success" : "error");
@@ -81,13 +70,29 @@ const QuestManager = () => {
 
     return (
         <div className="min-h-screen text-gray-800">
-            {isModalOpen && (
+            {isModalOpen && 
                 <AddQuestModal
                     editingId={editingId}
                     isEdit={isEdit}
                     onClose={handleCloseModal}
                 />
-            )}
+            }
+
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={4000}
+                onClose={() => setSnackbarOpen(false)}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+                <Alert 
+                    onClose={() => setSnackbarOpen(false)} 
+                    severity={snackbarSeverity}
+                    variant="filled" 
+                    sx={{ width: '100%' }}
+                >
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
             <main className="p-6 md:p-8 lg:p-7">
                 <Stack direction={"row"} justifyContent={"space-between"} sx={{ padding: 3 }}>
                     <h1 className="text-4xl font-bold">Quản lý màn chơi</h1>
@@ -132,9 +137,7 @@ const QuestManager = () => {
                                             <TableCell align="left">{row.title}</TableCell>
                                             <TableCell align="left">{row.decs}</TableCell>
                                             <TableCell align="left">
-                                                <TableCell>
-                                                    <Chip label={row.status ? "Hoạt động" : "Tạm ngưng"} color={row.status ? "success" : "error"} size="medium" />
-                                                </TableCell>
+                                                <Chip label={row.status ? "Hoạt động" : "Tạm ngưng"} color={row.status ? "success" : "error"} size="medium" />
                                             </TableCell>
                                             <TableCell align="left">
                                                 <Chip label={row.questType == 'lesson' ? 'Bài học' :

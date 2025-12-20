@@ -7,7 +7,7 @@ import TopicManager from "../pages/TopicManager"
 import UserManager from "../pages/UserManager"
 import QuestManager from "../pages/QuestManager"
 import QuestionManager from "../pages/QuestionManager"
-import ContentAnalyze from "../pages/ContentAnalyze"
+import LessonManager from "../pages/LessonManager"
 
 const RouteList = () => {
     return (
@@ -21,7 +21,7 @@ const RouteList = () => {
                 <Route path="users" element={<UserManager/>}/>
                 <Route path="quests" element={<QuestManager/>}/>
                 <Route path="questions" element={<QuestionManager/>}/>
-                <Route path="analyzing" element={<ContentAnalyze/>}/>
+                <Route path="lessons" element={<LessonManager/>}/>
             </Route>
         </Routes>
     )

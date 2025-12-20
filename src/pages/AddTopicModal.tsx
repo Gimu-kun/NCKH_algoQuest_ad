@@ -33,7 +33,7 @@ const AddTopicModal = ({ isEdit, editingId, onClose }: Props) => {
             indexOrder: res.data.indexOrder,
             status: res.data.status
           });
-          setStatus(res.data.status); // ✅ đồng bộ status
+          setStatus(res.data.status);
         }
       });
     }

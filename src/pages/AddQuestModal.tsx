@@ -1,7 +1,8 @@
-import { Divider, FormControl, Input, InputLabel, NativeSelect, CircularProgress, Backdrop, TextareaAutosize, Box, Button, Grid, Typography, IconButton, Stack, TextField, FormHelperText } from "@mui/material";
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
-import CloseIcon from "@mui/icons-material/Close";
+import { Divider, FormControl, Input, InputLabel, NativeSelect, CircularProgress, Backdrop, TextareaAutosize, Button, Grid, Stack, TextField, Collapse } from "@mui/material";
+import { useEffect, useState } from "react";
 import topicApiService from "../service/apis/topicApiService";
+import 'katex/dist/katex.min.css';
+import { AddBoxOutlined, DeleteOutline } from "@mui/icons-material";
 
 type Props = {
     isEdit: boolean;
@@ -14,36 +15,20 @@ type TopicSelectType = {
     title: string
 }
 
-const AddQuestModal = ({ isEdit, editingId, onClose }: Props) => {
+const AddQuestModal = ({ isEdit, onClose }: Props) => {
     //#region Biến toàn cục
-    const [activeType, setActiveType] = useState<number>(0);
     const [topicSelectorLs, setTopicSelectorLs] = useState<TopicSelectType[]>([])
-    const [loading, setLoading] = useState(false);
-    const [images, setImages] = useState<File[]>([]);
-    const fileInputRef = useRef<HTMLInputElement | null>(null);
-    //#endregion
+    const [loading, setLoading] = useState<boolean>(false);
+    const [refVideo, setRefVideo] = useState<string>("");
 
-    //#region Hàm upload ảnh
-    const handleUpload = (e: ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files) return;
+    //biến trạng thái ẩn/hiện các khối chính
+    const [lessonFormState, setLessonFormState] = useState<boolean>(false)
+    const [refFormState, setRefFormState] = useState<boolean>(false)
+    const [quizFormState, setQuizFormState] = useState<boolean>(false)
+    const [visualFormState, setVisualFormState] = useState<boolean>(false)
 
-        const files = Array.from(e.target.files);
-        setImages((prev) => [...prev, ...files]);
-
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-        }
-    };
-
-    const handleRemove = (indexToRemove: number) => {
-        setImages((prev) => {
-            const newImages = prev.filter((_, i) => i !== indexToRemove);
-            if (newImages.length === 0 && fileInputRef.current) {
-                fileInputRef.current.value = "";
-            }
-            return newImages;
-        });
-    };
+    //biến trạng thái xác định kiểu minh hoạ đang chọn
+    const [activeVisual, setActiveVisual] = useState<string>("null")
     //#endregion
     //#region Hàm khởi tạo nội dung
     const getTopicList = async () => {
@@ -64,12 +49,6 @@ const AddQuestModal = ({ isEdit, editingId, onClose }: Props) => {
         }
     }
 
-    const dividerText = {
-        1: "Điền thông tin bài học",
-        2: "Điền thông tin trắc nghiệm",
-        3: "Điền thông tin minh hoạ",
-    }[activeType];
-
     useEffect(() => {
         setLoading(true);
         getTopicList();
@@ -84,40 +63,24 @@ const AddQuestModal = ({ isEdit, editingId, onClose }: Props) => {
     }
 
     return (
-        <section className="fixed w-screen inset-0 flex items-center justify-center bg-black/20 z-10">
-            <Backdrop open={loading} sx={{zIndex:100}}>
+        <section className="fixed w-screen  inset-0 flex items-center justify-center bg-black/20 z-10">
+            <Backdrop open={loading} sx={{ zIndex: 100 }}>
                 <CircularProgress />
             </Backdrop>
             <form
                 onSubmit={handleSubmit}
-                className="bg-white p-5 rounded-xl w-min-1/2"
+                className="bg-white p-5 rounded-xl w-min-1/2 h-9/10 overflow-y-auto"
             >
                 <h2 className="text-xl font-bold text-center mb-3">
                     {isEdit ? "Cập nhật chủ đề" : "Thêm mới chủ đề"}
                 </h2>
                 {/*-------------- Các trường chung ----------------*/}
                 <FormControl sx={{ mr: 2 }}>
-                    <InputLabel variant="standard" htmlFor="uncontrolled-native">
-                        Kiểu màn chơi
-                    </InputLabel>
-                    <NativeSelect
-                        defaultValue={0}
-                        onChange={(e) => setActiveType(Number(e.target.value))}
-                    >
-                        <option value={0} disabled>Chọn kiểu màn chơi</option>
-                        <option value={1}>Bài học</option>
-                        <option value={2}>Bài tập trắc nghiệm</option>
-                        <option value={3}>Minh hoạ trực quan</option>
-                    </NativeSelect>
-                </FormControl>
-                <FormControl sx={{ mr: 2 }}>
                     <InputLabel variant="standard" htmlFor="uncontrolled-native" shrink={Boolean(topicSelectorLs)}>
                         Chọn chương
                     </InputLabel>
                     <NativeSelect
-                        defaultValue={"null"}
-                        onChange={(e) => setActiveType(Number(e.target.value))}
-                    >
+                        defaultValue={"null"}>
                         <option key={"null"} value={"null"} disabled>Chọn chương</option>
                         {
                             topicSelectorLs.length != 0 && topicSelectorLs.map(
@@ -161,114 +124,179 @@ const AddQuestModal = ({ isEdit, editingId, onClose }: Props) => {
                         inputProps={{ min: 1, max: 10 }}
                     />
                 </Grid>
-                {
-                    activeType != 0 && <Divider sx={{ mt: 2, mb: 2 }} textAlign="left">{dividerText}</Divider>
-                }
-                {
-                    activeType == 1 ?
-                        (
-                            <>
-                                {/*-------------- Các trường kiểu bài học ----------------*/}
+                <Stack>
+                    <Collapse in={refFormState}>
+                        {/*-------------- Các trường tài liệu tham khảo ----------------*/}
+                        <Divider sx={{ mt: 2, mb: 2, color: "purple", fontWeight: 700 }} textAlign="left">Điền thông tin tài liệu tham khảo</Divider>
+                        <FormControl fullWidth>
+                            {
+                                refVideo != "" &&
+                                <Stack flex={"row"} alignItems={"center"}>
+                                    <iframe
+                                        width="560"
+                                        height="315"
+                                        src="https://www.youtube.com/embed/VwRGw_Ip9Yo"
+                                        title="YouTube video player"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                        allowFullScreen>
+                                    </iframe>
+                                </Stack>
+                            }
+                            <Input
+                                name="ref-video"
+                                placeholder="Điền link video tham khảo"
+                                onChange={(e) => { setRefVideo(e.target.value) }}
+                                //defaultValue={editingRow?.title}
+                                fullWidth
+                                sx={{ mt: 2, mb: 1 }}
+                            />
+                            <Input
+                                name="ref-doc"
+                                placeholder="Điền link tài liệu tham khảo"
+                                onChange={(e) => { setRefVideo(e.target.value) }}
+                                //defaultValue={editingRow?.title}
+                                fullWidth
+                                sx={{ mt: 2, mb: 1 }}
+                            />
+                            <Button sx={{ mb: 2, width: "100%" }} color="error" variant="contained" component="label" onClick={() => { setRefFormState(false) }}>
+                                <DeleteOutline /> Xoá khối
+                            </Button>
+                        </FormControl>
+                    </Collapse>
+                    <Collapse in={quizFormState}>
+                        {/*-------------- Các trường kiểu bài tập trắc nghiệm ----------------*/}
+                        <Divider sx={{ mt: 2, mb: 2, color: "purple", fontWeight: 700 }} textAlign="left">Điền thông tin trắc nghiệm</Divider>
+                        <FormControl fullWidth>
+                            <Button sx={{ mb: 2, width: "100%" }} color="error" variant="contained" component="label" onClick={() => { setQuizFormState(false) }}>
+                                <DeleteOutline /> Xoá khối
+                            </Button>
+                        </FormControl>
+                    </Collapse>
+                    <Collapse in={visualFormState}>
+                        {/*-------------- Các trường kiểu minh hoạ trực quan ----------------*/}
+                        <Divider sx={{ mt: 2, mb: 2, color: "purple", fontWeight: 700 }} textAlign="left">Điền thông tin minh hoạ trực quan</Divider>
+                        <FormControl fullWidth>
+                            <InputLabel variant="standard" htmlFor="uncontrolled-native" shrink={Boolean(topicSelectorLs)}>
+                                Chọn chủ đề minh hoạ
+                            </InputLabel>
+                            <NativeSelect defaultValue={"null"} onChange={(e) => { setActiveVisual(e.target.value) }}>
+                                <option key={"null"} value={"null"} disabled>Chủ đề minh hoạ</option>
+                                <option key={"V-1"} value={"V-1"}>Độ phức tạp thuật toán</option>
+                                <option key={"V-2"} value={"V-2"}>CRUD danh sách liên kết đơn</option>
+                                <option key={"V-3"} value={"V-3"}>Bubble sort</option>
+                                <option key={"V-4"} value={"V-4"}>Minh hoạ hàng chờ (FIFO)</option>
+                                <option key={"V-5"} value={"V-5"}>Minh hoạ ngăn xếp (FILO)</option>
+                                <option key={"V-6"} value={"V-6"}>Cây nhị phân</option>
+                            </NativeSelect>
+                        </FormControl>
+                        <FormControl fullWidth>
+                            <Input
+                                name="complex-title-input"
+                                placeholder="Điền đề bài"
+                                //defaultValue={editingRow?.title}
+                                fullWidth
+                                sx={{ mt: 2 }}
+                            />
+                            <Collapse in={activeVisual != "null"}>
+                                <Divider sx={{ mt: 2, mb: 2, color: "purple", fontWeight: 700 }} textAlign="left">Dữ liệu chi tiết</Divider>
+                                {
+                                    activeVisual == "V-1" &&
+                                    <>
+                                        <Input
+                                            name="complex-var-input"
+                                            placeholder="Điền tham chiếu (n) - mặc định int"
+                                            //defaultValue={editingRow?.title}
+                                            fullWidth
+                                            sx={{ mt: 2, mb: 2 }}
+                                        />
+                                        <TextareaAutosize
+                                            id="complex-display-code"
+                                            aria-label="empty textarea"
+                                            placeholder="Điền code mẫu"
+                                            value={""}
+                                            onChange={() => {}}
+                                            style={{ width: "100%", minHeight: 100, padding: 10, border: "1px solid #000000", borderRadius: 5 }}
+                                        />
+                                    </>
+                                }
+                                {
+                                    activeVisual == "V-2" &&
+                                    <>
+                                        <Input
+                                            name="linklist-template-input"
+                                            placeholder="Nhập dãy giá trị trong danh sách mặc định [value1,value2,...]"
+                                            //defaultValue={editingRow?.title}
+                                            fullWidth
+                                            sx={{ mt: 2, mb: 2 }}
+                                        />
 
-                                <FormControl fullWidth>
-                                    <TextareaAutosize
-                                        aria-label="empty textarea"
-                                        placeholder="Nhập nội dung bài học"
+                                    </>
+                                }
+                                {
+                                    activeVisual == "V-3" &&
+                                    <>
+                                        <Input
+                                            name="bbsort-template-input"
+                                            placeholder="Nhập dãy giá trị mảng mặc định [value1,value2,...]"
+                                            //defaultValue={editingRow?.title}
+                                            fullWidth
+                                            sx={{ mt: 2, mb: 2 }}
+                                        />
 
-                                        style={{ width: "100%", minHeight: 100, padding: 10, border: "1px solid #000000", borderRadius: 5 }}
-                                    />
-                                    <FormHelperText>
-                                        Vị trí ảnh kí hiệu #pic số thứ tự ảnh stt=1 ghi là #pic1
-                                    </FormHelperText>
-                                </FormControl>
-                                <Box mt={2}>
-                                    {images.length > 0 && (
-                                        <Grid container spacing={2} mt={1} mb={1}>
-                                            {images.map((file, index) => (
-                                                <Grid size={4} key={index}>
-                                                    <Box
-                                                        sx={{
-                                                            position: "relative",
-                                                            border: "1px solid #ddd",
-                                                            borderRadius: 2,
-                                                            overflow: "hidden",
-                                                        }}
-                                                    >
-                                                        <IconButton
-                                                            size="small"
-                                                            onClick={() => handleRemove(index)}
-                                                            sx={{
-                                                                position: "absolute",
-                                                                top: 4,
-                                                                right: 4,
-                                                                bgcolor: "rgba(0,0,0,0.6)",
-                                                                color: "#fff",
-                                                                zIndex: 2,
-                                                                "&:hover": {
-                                                                    bgcolor: "rgba(0,0,0,0.8)",
-                                                                },
-                                                            }}
-                                                        >
-                                                            <CloseIcon fontSize="small" />
-                                                        </IconButton>
-                                                        <Box
-                                                            sx={{
-                                                                position: "absolute",
-                                                                top: 4,
-                                                                left: 4,
-                                                                bgcolor: "rgba(0,0,0,0.6)",
-                                                                color: "#fff",
-                                                                px: 1,
-                                                                borderRadius: 1,
-                                                                fontSize: 12,
-                                                            }}
-                                                        >
-                                                            {index + 1}
-                                                        </Box>
-                                                        <Box
-                                                            component="img"
-                                                            src={URL.createObjectURL(file)}
-                                                            alt={`preview-${index}`}
-                                                            sx={{
-                                                                width: "100%",
-                                                                height: 120,
-                                                                objectFit: "cover",
-                                                            }}
-                                                        />
-                                                    </Box>
-                                                </Grid>
-                                            ))}
-                                        </Grid>
-                                    )}
-                                    <Stack alignItems={"center"}>
-                                        <Button sx={{ width: 150 }} variant="outlined" component="label">
-                                            Tải ảnh lên
-                                            <input
-                                                ref={fileInputRef}
-                                                type="file"
-                                                hidden
-                                                multiple
-                                                accept="image/*"
-                                                onChange={handleUpload}
-                                            />
-                                        </Button>
-                                    </Stack>
-                                </Box>
-                            </>
-                        ) : activeType == 2 ?
-                        (
-                            <>
-                            {/*-------------- Các trường kiểu bài tập trắc nghiệm ----------------*/}
-                            </>
-                        ) : 
-                        (
-                            <>
-                            {/*-------------- Các trường minh hoạ trực quan ----------------*/}
-                            </>
-                        )
-                }
+                                    </>
+                                }
+                                {
+                                    activeVisual == "V-4" &&
+                                    <>
+                                        <Input
+                                            name="fifo-template-input"
+                                            placeholder="Nhập dãy giá trị hàng chờ mặc định [value1,value2,...]"
+                                            //defaultValue={editingRow?.title}
+                                            fullWidth
+                                            sx={{ mt: 2, mb: 2 }}
+                                        />
+
+                                    </>
+                                }
+                                {
+                                    activeVisual == "V-5" &&
+                                    <>
+                                        <Input
+                                            name="filo-template-input"
+                                            placeholder="Nhập dãy giá trị ngăn xếp mặc định [value1,value2,...]"
+                                            //defaultValue={editingRow?.title}
+                                            fullWidth
+                                            sx={{ mt: 2, mb: 2 }}
+                                        />
+
+                                    </>
+                                }
+                                {
+                                    activeVisual == "V-6" &&
+                                    <>
+                                        <Input
+                                            name="bntree-template-input"
+                                            placeholder="Nhập dãy giá trị cây mặc định kiểu value(left,right) (vd: 1(2(4,5),3))"
+                                            //defaultValue={editingRow?.title}
+                                            fullWidth
+                                            sx={{ mt: 2, mb: 2 }}
+                                        />
+
+                                    </>
+                                }
+                            </Collapse>
+                            <Button sx={{ mt: 2, mb: 2, width: "100%" }} color="error" variant="contained" component="label" onClick={() => { setVisualFormState(false) }}>
+                                <DeleteOutline /> Xoá khối
+                            </Button>
+                        </FormControl>
+                    </Collapse>
+                    {!lessonFormState && <Button variant="contained" sx={{ mb: 2 }} onClick={() => { setLessonFormState(true) }}><AddBoxOutlined />Thêm thông tin bài học</Button>}
+                    {!refFormState && <Button variant="contained" sx={{ mb: 2 }} onClick={() => { setRefFormState(true) }}><AddBoxOutlined /> Thêm tài liệu tham khảo</Button>}
+                    {!quizFormState && <Button variant="contained" sx={{ mb: 2 }} onClick={() => { setQuizFormState(true) }}><AddBoxOutlined /> Thêm danh sách bài tập</Button>}
+                    {!visualFormState && <Button variant="contained" sx={{ mb: 2 }} onClick={() => { setVisualFormState(true) }}><AddBoxOutlined /> Thêm minh hoạ trực quan</Button>}
+                </Stack>
                 <Stack direction="row" justifyContent="center" spacing={2} mt={3}>
-                    <Button variant="outlined" color="error" onClick={()=>{onClose()}}>
+                    <Button variant="outlined" color="error" onClick={() => { onClose() }}>
                         Đóng
                     </Button>
                     <Button variant="contained" type="submit">
