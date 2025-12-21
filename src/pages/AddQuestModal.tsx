@@ -3,17 +3,13 @@ import { useEffect, useState } from "react";
 import topicApiService from "../service/apis/topicApiService";
 import 'katex/dist/katex.min.css';
 import { AddBoxOutlined, DeleteOutline } from "@mui/icons-material";
+import type { TopicSelectType } from "../types/topicType";
 
 type Props = {
     isEdit: boolean;
     editingId: string | null;
     onClose: (message?: string, success?: boolean) => void;
 };
-
-type TopicSelectType = {
-    id: string,
-    title: string
-}
 
 const AddQuestModal = ({ isEdit, onClose }: Props) => {
     //#region Biến toàn cục

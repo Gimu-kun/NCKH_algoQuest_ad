@@ -1,6 +1,11 @@
 import type { UserGeneral } from "./authType"
 import type { questType } from "./questType"
 
+export type TopicSelectType = {
+    id: string,
+    title: string
+}
+
 export type topicType = {
     id: string,
     title: string,
