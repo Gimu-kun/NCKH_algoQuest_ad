@@ -51,7 +51,21 @@ const lessonApiService = {
     } catch (err) {
         return handleError(err, "Lỗi khi thêm bài học");
     }
-  }
+  },
+  async getById(id: string): Promise<ApiResponse<any>> {
+      try {
+          const res = await axiosClient.get(`/lessons/${id}`);
+          return { 
+            success: true, 
+            message: "Thành công", 
+            data: res.data.data };
+      } catch (err) { 
+        return { 
+          success: false, 
+          message: "Lỗi lấy chi tiết bài học" 
+        }; 
+      }
+  },
 };
 
 export default lessonApiService;

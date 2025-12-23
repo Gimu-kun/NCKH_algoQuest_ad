@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import type { questType } from "../types/questType";
-import { Alert, Button, Chip, Paper, Snackbar, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Alert, Backdrop, Button, Chip, Paper, Snackbar, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import questApiService from "../service/apis/questApiService";
 import formatDate from "../service/utils/dataFormat";
 import AddQuestModal from "./AddQuestModal";
+import ManagerQuestContentModal from "./ManagerQuestContentModal";
 
 function createData(data: questType) {
     return {
         id: data.id,
-        topicId: data?.topicId?.id && "null",
+        topicId: data?.topicId?.id,
         title: data.title,
         decs: data.description,
         status: data.status,
@@ -23,11 +24,13 @@ function createData(data: questType) {
 
 const QuestManager = () => {
     const [isModalOpen, setModalOpen] = useState(false);
+    const [isContentModalOpen, setContentModalOpen] = useState(false);
     const [questList, setQuestList] = useState<questType[]>([]);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
+    const [selectingQuest, setSelectingQuest] = useState<string>("")
 
     const rows = questList.map(item => createData(item));
     const isEdit = Boolean(editingId);
@@ -77,6 +80,12 @@ const QuestManager = () => {
                     onClose={handleCloseModal}
                 />
             }
+
+            <Backdrop open={isContentModalOpen} sx={{ zIndex: 100 }}>
+                <Stack sx={{ maxHeight: "90%", overflowY: "auto", width: "80%" }}>
+                    <ManagerQuestContentModal questId={selectingQuest} questName="" onClose={() => setContentModalOpen(false)} />
+                </Stack>
+            </Backdrop>
 
             <Snackbar
                 open={snackbarOpen}
@@ -139,22 +148,17 @@ const QuestManager = () => {
                                             <TableCell align="left">
                                                 <Chip label={row.status ? "Hoạt động" : "Tạm ngưng"} color={row.status ? "success" : "error"} size="medium" />
                                             </TableCell>
-                                            <TableCell align="left">
-                                                <Chip label={row.questType == 'lesson' ? 'Bài học' :
-                                                    row.questType == 'questions' ? 'Trắc nghiệm' :
-                                                        row.questType == 'visualization' ? 'Minh hoạ' : 'Không rõ'}
-                                                    color={row.questType == 'lesson' ? 'primary' :
-                                                        row.questType == 'questions' ? 'secondary' :
-                                                            row.questType == 'visualization' ? 'success' : 'error'} size="medium" />
-                                            </TableCell>
-                                            <TableCell align="left">{row.orderIndex}</TableCell>
+                                            <TableCell align="center">{row.orderIndex}</TableCell>
                                             <TableCell>{formatDate(row.createdAt.toString())}</TableCell>
                                             <TableCell>{formatDate(row.updatedAt.toString())}</TableCell>
                                             <TableCell>{row.createBy}</TableCell>
                                             <TableCell>{row.updatedBy}</TableCell>
                                             <TableCell align="left">
-                                                <Button sx={{ marginBottom: 1, fontSize: 12, whiteSpace: "nowrap" }} size="small" variant="outlined">
-                                                    Chi tiết
+                                                <Button sx={{ marginBottom: 1, fontSize: 12, whiteSpace: "nowrap" }} onClick={()=>{
+                                                    setSelectingQuest(row.id),
+                                                    setContentModalOpen(true)
+                                                }} size="small" variant="outlined">
+                                                    Thêm nội dung
                                                 </Button>
                                                 <br />
                                                 <Button sx={{ marginBottom: 1, fontSize: 12, whiteSpace: "nowrap" }} size="small" variant="contained" color="secondary" onClick={() => { handleEdit(row.id) }}>

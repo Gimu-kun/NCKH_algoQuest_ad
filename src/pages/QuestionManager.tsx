@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import formatDate from "../service/utils/dataFormat";
 import questionApiService from "../service/apis/questionApiService";
 import AddQuestionModal from "./AddQuestionModal";
-import { LessonListLatexRender } from "../components/ui/LessonLatexRender";
+import { LessonLatexRender } from "../components/ui/LessonLatexRender";
 
 const Row = (props: { row: any }) => {
     const { row } = props;
@@ -70,7 +70,7 @@ const Row = (props: { row: any }) => {
                         <Box sx={{ margin: 2, padding: 2, backgroundColor: '#f9f9f9', borderRadius: 2 }}>
                             <Typography variant="h6" gutterBottom color="primary">Nội dung câu hỏi</Typography>
                             <Box sx={{ p: 2, border: "1px dashed #ccc", borderRadius: 1, bgcolor: "#fafafa", mb: 2 }}>
-                                <LessonListLatexRender content={row.questionContent} images={row.questionImgs.map((item: any) => item.url)} />
+                                <LessonLatexRender content={row.questionContent} images={row.questionImgs.map((item: any) => item.url)} />
                             </Box>
 
                             <Typography variant="h6" gutterBottom color="secondary">Đáp án ({row.questionType})</Typography>

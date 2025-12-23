@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import formatDate from "../service/utils/dataFormat";
 import lessonApiService from "../service/apis/lessonApiService";
 import AddLessonModal from "./AddLessonModal";
-import { LessonListLatexRender } from "../components/ui/LessonLatexRender";
+import { LessonLatexRender } from "../components/ui/LessonLatexRender";
 
 const Row = (props: { row: any }) => {
     const {row} = props;
@@ -49,7 +49,7 @@ const Row = (props: { row: any }) => {
                                     whiteSpace: "pre-wrap"
                                 }}
                             >
-                                <LessonListLatexRender content={row.content} images={row.lessonImgs.map((item:any)=>item.url)}/>
+                                <LessonLatexRender content={row.content} images={row.lessonImgs.map((item:any)=>item.url)}/>
                             </Box>
                             <Box sx={{ mt: 2 }}>
                                 <Typography variant="subtitle2" gutterBottom>Hình ảnh minh họa ({row.lessonImgs.length}):</Typography>

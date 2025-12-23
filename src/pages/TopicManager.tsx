@@ -5,6 +5,7 @@ import topicApiService from "../service/apis/topicApiService";
 import type { topicType } from "../types/topicType";
 import AddTopicModal from "./AddTopicModal";
 import TopicRow from "./TopicRow";
+import AddQuestToTopicModal from "./AddQuestToTopicModal";
 
 
 
@@ -16,7 +17,8 @@ const TopicManager = () => {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
-
+    const [isQuestModalOpen, setQuestModalOpen] = useState(false);
+    const [selectedTopic, setSelectedTopic] = useState<{id: string, title: string} | null>(null);
 
     const isEdit = Boolean(editingId);
 
@@ -49,6 +51,22 @@ const TopicManager = () => {
 
         if (message) {
             showSnackbar(message, success ? "success" : "error");
+        }
+    };
+
+    // Hàm mở modal thêm quest
+    const handleOpenAddQuest = (id: string, title: string) => {
+        setSelectedTopic({ id, title });
+        setQuestModalOpen(true);
+    };
+
+    const handleCloseQuestModal = (message?: string, success?: boolean) => {
+        setQuestModalOpen(false);
+        if (success) {
+            showSnackbar(message || "Thao tác thành công", "success");
+            fetchTopics(); // Load lại để cập nhật số lượng màn chơi
+        } else if (message) {
+            showSnackbar(message, "error");
         }
     };
 
@@ -106,11 +124,22 @@ const TopicManager = () => {
                     </TableHead>
                     <TableBody>
                         {topics.map(topic => (
-                            <TopicRow key={topic.id} topic={topic} onEdit={handleEdit} />
+                            <TopicRow
+                                key={topic.id} 
+                                topic={topic} 
+                                onEdit={handleEdit} 
+                                onAddQuest={handleOpenAddQuest} // Truyền thêm callback này
+                            />
                         ))}
                     </TableBody>
                 </Table>
             </TableContainer>
+            <AddQuestToTopicModal 
+                open={isQuestModalOpen}
+                topicId={selectedTopic?.id || null}
+                topicTitle={selectedTopic?.title || ""}
+                onClose={handleCloseQuestModal}
+            />
             </main>
         </div>
     );

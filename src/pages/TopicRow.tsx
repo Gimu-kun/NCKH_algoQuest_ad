@@ -7,10 +7,11 @@ import type { topicType } from "../types/topicType";
 
 type TopicRowProps = {
     topic: topicType;
+    onAddQuest:(id: string, title: string) => void;
     onEdit: (id: string) => void;
 };
 
-const TopicRow = ({ topic, onEdit }: TopicRowProps) => {
+const TopicRow = ({ topic, onEdit, onAddQuest }: TopicRowProps) => {
     const [open, setOpen] = useState(false);
 
     return (
@@ -34,8 +35,8 @@ const TopicRow = ({ topic, onEdit }: TopicRowProps) => {
                 <TableCell>{topic.createdBy.username}</TableCell>
                 <TableCell>{topic.updatedBy.username}</TableCell>
                 <TableCell>
-                    <Button sx={{marginBottom:1, fontSize:12, whiteSpace:"nowrap"}} size="small" variant="outlined" onClick={() => onEdit(topic.id)}>
-                        Thêm màn
+                    <Button size="small" variant="outlined" color="secondary" onClick={() => onAddQuest(topic.id, topic.title)}>
+                        Thêm màn chơi
                     </Button>
                     <br/>
                     <Button sx={{marginBottom:1, fontSize:12, whiteSpace:"nowrap"}} size="small" variant="contained" color="secondary" onClick={() => onEdit(topic.id)}>
