@@ -1,4 +1,4 @@
-import { FormControl, Input, InputLabel, NativeSelect, CircularProgress, Backdrop, Button, Stack, TextField, Typography, Chip } from "@mui/material";
+import { FormControl, InputLabel, NativeSelect, CircularProgress, Backdrop, Button, Stack, TextField, Typography, Chip } from "@mui/material";
 import { useEffect, useState } from "react";
 import topicApiService from "../service/apis/topicApiService";
 import 'katex/dist/katex.min.css';
@@ -84,6 +84,7 @@ const AddQuestModal = ({ isEdit, editingId, onClose }: Props) => {
                 status: status,
                 operatorId:user.id
             };
+            console.log(data)
 
             setLoading(true);
             let res;

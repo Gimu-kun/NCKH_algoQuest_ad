@@ -50,14 +50,20 @@ const Row = (props: { row: any }) => {
                     </IconButton>
                 </TableCell>
                 <TableCell><b>{row.id}</b></TableCell>
+                <TableCell><b>{row.topicId}</b></TableCell>
                 <TableCell>
                     <Chip label={row.questionType.toUpperCase()} size="small" color="primary" variant="outlined" />
+                </TableCell>
+                <TableCell>
+                    <Chip label={row.bloom.toUpperCase()} size="small" color="secondary" variant="filled" />
                 </TableCell>
                 <TableCell>
                     <Typography noWrap sx={{ maxWidth: 200 }}>{row.questionContent}</Typography>
                 </TableCell>
                 <TableCell>{formatDate(row.createdAt)}</TableCell>
+                <TableCell>{formatDate(row.updatedAt)}</TableCell>
                 <TableCell>{row.createdBy.username}</TableCell>
+                <TableCell>{row.updatedBy.username}</TableCell>
                 <TableCell>
                     <Button sx={{ marginLeft: 1 }} size="small" variant="contained" color="secondary">Sửa</Button>
                     <Button sx={{ marginLeft: 1 }} size="small" variant="outlined" color="error">Xoá</Button>
@@ -65,15 +71,15 @@ const Row = (props: { row: any }) => {
             </TableRow>
 
             <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
-                    <Collapse in={open} timeout="auto" unmountOnExit>
-                        <Box sx={{ margin: 2, padding: 2, backgroundColor: '#f9f9f9', borderRadius: 2 }}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={10}>
+                    <Collapse in={open} timeout="auto" unmountOnExit >
+                        <Box sx={{ margin: 2, padding: 2, backgroundColor: '#f9f9f9', borderRadius: 2}}>
                             <Typography variant="h6" gutterBottom color="primary">Nội dung câu hỏi</Typography>
                             <Box sx={{ p: 2, border: "1px dashed #ccc", borderRadius: 1, bgcolor: "#fafafa", mb: 2 }}>
                                 <LessonLatexRender content={row.questionContent} images={row.questionImgs.map((item: any) => item.url)} />
                             </Box>
 
-                            <Typography variant="h6" gutterBottom color="secondary">Đáp án ({row.questionType})</Typography>
+                            <Typography variant="h6" gutterBottom color="secondary">Đáp án ({row.questionType.toUpperCase()})</Typography>
                             <Box sx={{ pl: 2, mb: 2 }}>
                                 {renderAnswers()}
                             </Box>
@@ -131,7 +137,7 @@ const QuestionManager = () => {
             </Backdrop>
 
             <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-                <Typography variant="h4" fontWeight="bold">Quản lý câu hỏi</Typography>
+                <Typography variant="h4" fontWeight="bold">Quản lý câu hỏi ({questions.length} câu)</Typography>
                 <Button variant="contained" onClick={() => setModalOpen(true)}>Thêm câu hỏi mới</Button>
             </Stack>
 
@@ -141,10 +147,14 @@ const QuestionManager = () => {
                         <TableRow>
                             <TableCell width="50px" />
                             <TableCell>ID</TableCell>
+                            <TableCell>ID chương</TableCell>
                             <TableCell>Loại</TableCell>
+                            <TableCell>Bloom</TableCell>
                             <TableCell>Nội dung</TableCell>
                             <TableCell>Ngày tạo</TableCell>
+                            <TableCell>Ngày cập nhật</TableCell>
                             <TableCell>Người tạo</TableCell>
+                            <TableCell>Người cập nhật</TableCell>
                             <TableCell>Thao tác</TableCell>
                         </TableRow>
                     </TableHead>

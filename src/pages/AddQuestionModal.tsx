@@ -173,7 +173,7 @@ const AddQuestionModal = ({ onClose }: Props) => {
                 return (
                     <Stack spacing={2}>
                         <Typography variant="subtitle2">Cặp nối (Cột 1 nối với Cột 2):</Typography>
-                        {mpAnswers.map((ans, index) => (
+                        {mpAnswers.map((_, index) => (
                             <Stack key={index} direction="row" spacing={2}>
                                 <TextField label="Vế A" fullWidth size="small" onChange={(e) => {
                                     const newAns = [...mpAnswers];

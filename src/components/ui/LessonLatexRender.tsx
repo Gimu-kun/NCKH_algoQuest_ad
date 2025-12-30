@@ -3,12 +3,12 @@ import { InlineMath } from "react-katex";
 
 type UnifiedRenderProps = {
     content: string;
-    // Chấp nhận mảng chứa cả File (đang upload) hoặc string (đã lưu)
     images: (File | string)[];
 }
 
-export const LessonLatexRender = ({ content, images }: UnifiedRenderProps) => {
-    // Regex tách nội dung dựa trên công thức $...$ hoặc ký hiệu #pic1, #pic2...
+export const LessonLatexRender = ({ content, images = [] }: UnifiedRenderProps) => {
+    console.log(content);
+    
     const parts = content.split(/(\$.*?\$|#pic\d+)/g);
 
     return parts.map((part, index) => {

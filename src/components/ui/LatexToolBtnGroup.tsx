@@ -9,21 +9,25 @@ const LatexToolBtnGroup = ({insertLatex}:{insertLatex:(latex:string)=>void;}) =>
         { label: '\\sqrt[n]{a}', latex: '\$\\sqrt[n]{a}$', tooltip: 'Căn bậc n' },
         { label: 'a^{b}', latex: '$a^{b}$', tooltip: 'Số mũ' },
         { label: 'a_{b}', latex: '$a_{b}$', tooltip: 'Chỉ số dưới' },
+        { label: '\\mathcal{f}', latex: '\$\\mathcal{f}$', tooltip: 'Hàm số' },
 
         // Nhóm toán tử và quan hệ
-        { label: '±', latex: '\$\\pm$', tooltip: 'Cộng trừ' },
-        { label: '×', latex: '\$\\times$', tooltip: 'Dấu nhân' },
-        { label: '÷', latex: '\$\\div$', tooltip: 'Dấu chia' },
-        { label: '≠', latex: '\$\\neq$', tooltip: 'Khác' },
-        { label: '≈', latex: '\$\\approx$', tooltip: 'Xấp xỉ' },
-        { label: '≤', latex: '\$\\le$', tooltip: 'Nhỏ hơn hoặc bằng' },
-        { label: '≥', latex: '\$\\ge$', tooltip: 'Lớn hơn hoặc bằng' },
+        { label: '\\pm', latex: '\$\\pm$', tooltip: 'Cộng trừ' },
+        { label: '\\times', latex: '\$\\times$', tooltip: 'Dấu nhân' },
+        { label: '\\div', latex: '\$\\div$', tooltip: 'Dấu chia' },
+        { label: '\\neq', latex: '\$\\neq$', tooltip: 'Khác' },
+        { label: '\\approx', latex: '\$\\approx$', tooltip: 'Xấp xỉ' },
+        { label: '\\le', latex: '\$\\le$', tooltip: 'Nhỏ hơn hoặc bằng' },
+        { label: '\\ge', latex: '\$\\ge$', tooltip: 'Lớn hơn hoặc bằng' },
 
         // Nhóm logic và tập hợp
-        { label: '⇒', latex: '\$\\Rightarrow$', tooltip: 'Suy ra' },
-        { label: '⇔', latex: '\$\\Leftrightarrow$', tooltip: 'Tương đương' },
-        { label: '∈', latex: '\$\\in$', tooltip: 'Thuộc tập hợp' },
-        { label: '⊂', latex: '\$\\subset$', tooltip: 'Tập hợp con' },
+        { label: '\\Rightarrow', latex: '\$\\Rightarrow$', tooltip: 'Suy ra' },
+        { label: '\\Leftrightarrow', latex: '\$\\Leftrightarrow$', tooltip: 'Tương đương' },
+        { label: '\\in', latex: '\$\\in$', tooltip: 'Thuộc tập hợp' },
+        { label: '\\subset', latex: '\$\\subset$', tooltip: 'Tập hợp con' },
+        { label: '\\exists', latex: '\$\\exists$', tooltip: 'Tồn tại' },
+        { label: '\\forall', latex: '\$\\forall$', tooltip: 'Với mọi' },
+        { label: '\\mathbb{R}', latex: '\$\\mathbb{R}$', tooltip: 'Tập hợp R' },
 
         // Nhóm giải tích / cao cấp
         { label: '\\sum', latex: '\$\\sum_{i=1}^{n}{a}$', tooltip: 'Tổng' },
@@ -32,6 +36,14 @@ const LatexToolBtnGroup = ({insertLatex}:{insertLatex:(latex:string)=>void;}) =>
         { label: '\\pi', latex: '\$\\pi$', tooltip: 'Số Pi' },
         { label: '\\Delta', latex: '\$\\Delta$', tooltip: 'Delta (biệt thức)' },
         { label: '\\alpha', latex: '\$\\alpha$', tooltip: 'Alpha' },
+        { label: '\\mathcal{O}', latex: '\$\\mathcal{O}$', tooltip: 'BigO' },
+        { label: '\\Omega', latex: '\$\\Omega$', tooltip: 'Omega' },
+        { label: '\\Theta', latex: '\$\\Theta$', tooltip: 'Omega' },
+        
+        { label: '⇊ Con', latex: '[CHILD_HERE]', tooltip: 'Chèn vị trí hiển thị mục con' },
+        { label: "In đậm", latex: "[b]Text[/b]", tooltip: "Chèn chữ in đậm" },
+        { label: "Màu đỏ", latex: "[color=red]Text[/color]", tooltip: "Chèn màu chữ" },
+        { label: "Căn giữa", latex: "[align=center]Text[/align]", tooltip: "Chèn căn lề chữ" },
     ];
 
     return (

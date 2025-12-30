@@ -36,6 +36,7 @@ const ManageQuestContentModal = ({ questId, questName, onClose }: Props) => {
     const [searchTerm, setSearchTerm] = useState("");
 
     const fetchCurrentQuestContent = async () => {
+        if(!questId) return;
         try {
             const resQuest = await questApiService.getById(questId);
             console.log(resQuest)
@@ -76,6 +77,8 @@ const ManageQuestContentModal = ({ questId, questName, onClose }: Props) => {
         ]);
         if (resLessons.success) setAllLessons(resLessons.data || []);
         if (resQuestions.success) setAllQuestions(resQuestions.data || []);
+        console.log(resLessons)
+        console.log(resQuestions)
     };
 
     const handleSave = async () => {
@@ -292,8 +295,6 @@ const ManageQuestContentModal = ({ questId, questName, onClose }: Props) => {
                         <Typography variant="subtitle2" color="secondary" sx={{ mb: 1 }}>Câu hỏi</Typography>
                         <Stack spacing={1}>
                             {selectedQuestions.map(sq => {
-                                const q = allQuestions.find(item => item.id === sq.id);
-                                console.log(sq)
                                 return (
                                     <Paper key={sq.id} variant="outlined" sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <Typography variant="body2" sx={{ flexGrow: 1 }}>ID: {sq.id}</Typography>
