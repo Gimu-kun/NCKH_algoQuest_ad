@@ -58,7 +58,19 @@ const questionApiService = {
                 message: "Lỗi lấy chi tiết câu hỏi" 
             }; 
         }
-    }
+    },
+    async update(id: string, formData: FormData): Promise<ApiResponse<questionType>> {
+      try {
+          const res = await axiosClient.put(`/questions/${id}`, formData);
+          return {
+              success: true,
+              message: res.data?.message ?? "Cập nhật thành công",
+              data: res.data?.data
+          };
+      } catch (err) {
+          return handleError(err, "Lỗi khi cập nhật câu hỏi");
+      }
+  }
 };
 
 export default questionApiService;

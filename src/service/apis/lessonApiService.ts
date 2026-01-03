@@ -1,7 +1,7 @@
 import axios from "axios";
 import axiosClient from "./axiosClient";
 import type { ApiResponse } from "../../types/apiResponseType";
-import type { LessonType } from "../../types/lessonType";
+import type { LessonType, SectionCreateRequest } from "../../types/lessonType";
 
 const handleError = (err: unknown, defaultMsg: string): ApiResponse<never> => {
   let message = defaultMsg;
@@ -61,7 +61,7 @@ const lessonApiService = {
 
   async addSection(
     lessonId: string, 
-    sectionData: any, 
+    sectionData: SectionCreateRequest, 
     images: File[], 
     parentId?: string
   ): Promise<ApiResponse<any>> {

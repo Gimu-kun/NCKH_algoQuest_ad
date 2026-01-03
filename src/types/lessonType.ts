@@ -16,7 +16,8 @@ export type LessonSectionType = {
     level: number;
     orderIndex: number;
     images: LessonImg[];
-    children: LessonSectionType[]; // Cấu trúc đệ quy
+    children: LessonSectionType[];
+    refs?: RefType[];
 }
 
 export type LessonType = {
@@ -36,3 +37,17 @@ export type LessonCreationType = {
     title: string;
     operatorId: string;
 }
+
+export interface RefType {
+    id?:string;
+    type: "video" | "doc";
+    url: string;
+}
+  
+export interface SectionCreateRequest {
+    title: string;
+    content: string;
+    level: number;
+    refs?: RefType[];
+}
+  

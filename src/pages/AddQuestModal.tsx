@@ -21,18 +21,6 @@ const AddQuestModal = ({ isEdit, editingId, onClose }: Props) => {
     const [questData, setQuestData] = useState<any>(null);
     const [status, setStatus] = useState<boolean>(false);
     const user = useSelector((state: RootState) => state.user);
-    const [refVideo, setRefVideo] = useState<string>("");
-
-    //biến trạng thái ẩn/hiện các khối chính
-    const [lessonFormState, setLessonFormState] = useState<boolean>(false)
-    const [refFormState, setRefFormState] = useState<boolean>(false)
-    const [quizFormState, setQuizFormState] = useState<boolean>(false)
-    const [visualFormState, setVisualFormState] = useState<boolean>(false)
-
-    //biến trạng thái xác định kiểu minh hoạ đang chọn
-    const [activeVisual, setActiveVisual] = useState<string>("null")
-    //#endregion
-    //#region Hàm khởi tạo nội dung
     const getTopicList = async () => {
         try {
             const res = await topicApiService.getAll();

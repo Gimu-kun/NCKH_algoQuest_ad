@@ -5,12 +5,29 @@ import { UploadFileOutlined, DeleteOutline, ContentCopy } from "@mui/icons-mater
 import lessonApiService from "../service/apis/lessonApiService";
 import LatexToolBtnGroup from "../components/ui/LatexToolBtnGroup";
 import FormatAndLatexRender from "./FormatAndLatexRender";
+import type { RefType } from "../types/lessonType";
 
 const AddSectionModal = ({ open, onClose, lessonId, parentId, currentLevel }: any) => {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [images, setImages] = useState<File[]>([]);
     const [loading, setLoading] = useState(false);
+    const [refs, setRefs] = useState<RefType[]>([]);
+
+    const getYoutubeId = (url: string): string | null => {
+        if (!url) return null;
+
+        const regex =
+            /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+
+        const match = url.match(regex);
+        return match ? match[1] : null;
+    };
+
+    const youtubePreviewId = useMemo(() => {
+        const videoRef = refs.find(r => r.type === "video");
+        return videoRef ? getYoutubeId(videoRef.url) : null;
+    }, [refs]);
 
     const imagePreviewUrls = useMemo(() => {
         return images.map(file => URL.createObjectURL(file));
@@ -28,18 +45,52 @@ const AddSectionModal = ({ open, onClose, lessonId, parentId, currentLevel }: an
         }, 0);
     };
 
+
     const handleSubmit = async () => {
         if (!title.trim()) return alert("Vui lòng nhập tiêu đề!");
+
         setLoading(true);
-        const res = await lessonApiService.addSection(lessonId, {
-            title, content, level: currentLevel
-        }, images, parentId);
+
+        console.log(refs)
+        const sectionData = {
+            title,
+            content,
+            level: currentLevel,
+            refs: refs.filter(r => r.url.trim() !== "")
+        };
+
+        const res = await lessonApiService.addSection(
+            lessonId,
+            sectionData,
+            images,
+            parentId
+        );
+
         setLoading(false);
+
         if (res.success) {
-            setTitle(""); setContent(""); setImages([]);
+            setTitle("");
+            setContent("");
+            setImages([]);
+            setRefs([]);
             onClose(true);
         }
     };
+
+    const addRef = () => {
+        setRefs([...refs, { type: "video", url: "" }]);
+    };
+
+    const updateRef = (index: number, key: keyof RefType, value: string) => {
+        const newRefs = [...refs];
+        newRefs[index][key] = value as any;
+        setRefs(newRefs);
+    };
+
+    const removeRef = (index: number) => {
+        setRefs(refs.filter((_, i) => i !== index));
+    };
+
 
     // --- LOGIC RENDER THÔNG MINH ---
     const SmartPreview = ({ text }: { text: string }) => {
@@ -130,6 +181,73 @@ const AddSectionModal = ({ open, onClose, lessonId, parentId, currentLevel }: an
                                 <input type="file" hidden multiple accept="image/*" onChange={e => setImages([...images, ...Array.from(e.target.files || [])])} />
                             </Button>
                             <Typography variant="caption" color="text.secondary">Tải ảnh lên để lấy mã neo (#pic1, #pic2...)</Typography>
+                        </Stack>
+                        <Divider sx={{ my: 3 }} />
+                        {youtubePreviewId && (
+                            <Box
+                                sx={{
+                                    mb: 3,
+                                    borderRadius: 3,
+                                    overflow: "hidden",
+                                    boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+                                    border: "1px solid #e0e0e0"
+                                }}
+                            >
+                                <iframe
+                                    width="100%"
+                                    height="360"
+                                    src={`https://www.youtube.com/embed/${youtubePreviewId}`}
+                                    title="YouTube video preview"
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                />
+                            </Box>
+                        )}
+                        <Typography variant="subtitle1" fontWeight="bold" color="primary">
+                            Tài liệu & Video tham khảo
+                        </Typography>
+
+                        <Stack spacing={2} sx={{ mt: 2 }}>
+                            {refs.map((ref, index) => (
+                                <Paper key={index} sx={{ p: 2, bgcolor: "#fafafa" }} variant="outlined">
+                                    <Grid container spacing={2} alignItems="center">
+                                        <Grid size={{ xs: 12, md: 3 }}>
+                                            <TextField
+                                                select
+                                                fullWidth
+                                                label="Loại"
+                                                SelectProps={{ native: true }}
+                                                value={ref.type}
+                                                onChange={e => updateRef(index, "type", e.target.value)}
+                                            >
+                                                <option value="video">Video</option>
+                                                <option value="doc">Tài liệu</option>
+                                            </TextField>
+                                        </Grid>
+
+                                        <Grid size={{ xs: 12, md: 8 }}>
+                                            <TextField
+                                                fullWidth
+                                                label="URL"
+                                                placeholder="https://..."
+                                                value={ref.url}
+                                                onChange={e => updateRef(index, "url", e.target.value)}
+                                            />
+                                        </Grid>
+
+                                        <Grid size={{ xs: 12, md: 1 }}>
+                                            <IconButton color="error" onClick={() => removeRef(index)}>
+                                                <DeleteOutline />
+                                            </IconButton>
+                                        </Grid>
+                                    </Grid>
+                                </Paper>
+                            ))}
+
+                            <Button variant="outlined" onClick={addRef}>
+                                + Thêm tài liệu / video
+                            </Button>
                         </Stack>
 
                         {/* DANH SÁCH ẢNH ĐÃ TẢI */}

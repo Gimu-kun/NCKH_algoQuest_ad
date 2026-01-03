@@ -1,4 +1,4 @@
-import { Box, Button, Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, TextField, Typography, IconButton, Checkbox, Paper, TextareaAutosize, NativeSelect } from "@mui/material";
+import { Box, Button, Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, TextField, Typography, IconButton, Checkbox, Paper, TextareaAutosize, NativeSelect, CircularProgress } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { UploadFileOutlined, AddCircleOutline, DeleteOutline } from "@mui/icons-material";
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -12,13 +12,18 @@ import type { RootState } from "../store/store";
 
 type Props = {
     onClose: (message?: string, success?: boolean) => void;
+    questionId?: string | null;
 };
 
-const AddQuestionModal = ({ onClose }: Props) => {
+const AddQuestionModal = ({ onClose, questionId }: Props) => {
+    const isEditMode = Boolean(questionId);
+    const [loading, setLoading] = useState(false);
     const [questionType, setQuestionType] = useState("mcq");
     const [content, setContent] = useState<string>("");
     const [images, setImages] = useState<File[]>([]);
     const [previewImages, setPreviewImages] = useState<string[]>([]);
+    const [existingImages, setExistingImages] = useState<any[]>([]);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [topicSelectorLs, setTopicSelectorLs] = useState<TopicSelectType[]>([])
     const user = useSelector((state: RootState) => state.user);
@@ -84,11 +89,16 @@ const AddQuestionModal = ({ onClose }: Props) => {
         images.forEach((img) => formData.append("imgs", img));
 
         try {
-            await questionApiService.create(formData);
-            handleClearForm();
-            onClose("Thêm câu hỏi thành công!", true);
+            if (isEditMode && questionId) {
+                await questionApiService.update(questionId,formData);
+            } else {
+                await questionApiService.create(formData);
+            }
+            onClose(isEditMode ? "Cập nhật thành công!" : "Thêm mới thành công!", true);
         } catch (error) {
             console.error(error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -207,11 +217,48 @@ const AddQuestionModal = ({ onClose }: Props) => {
         getTopicList();
     }, [])
 
+    useEffect(() => {
+        const loadQuestionData = async () => {
+            if (!questionId) return;
+            setLoading(true);
+            try {
+                const res = await questionApiService.getById(questionId);
+                if (res.success && res.data) {
+                    const q = res.data;
+                    setQuestionType(q.questionType);
+                    setContent(q.questionContent);
+                    setSelectedTopicId(q.topicId);
+                    setSelectedBloom(q.bloom);
+                    setExistingImages(q.questionImgs || []);
+                    
+                    // Map đáp án tương ứng
+                    if (q.questionType === 'mcq') setMcqAnswers(q.mcqAnswers);
+                    if (q.questionType === 'fn') setFnAnswer(q.fnAnswers[0] || { answer: 0, tolerance: 0 });
+                    if (q.questionType === 'fs') setFsAnswer(q.fsAnswers[0] || { answer: "", synonyms: "" });
+                    if (q.questionType === 'fns') setFnsAnswer(q.fnsAnswers[0]?.answer || "");
+                    if (q.questionType === 'mp') setMpAnswers(q.mpAnswers);
+                }
+            } catch (error) {
+                console.error("Lỗi tải dữ liệu cập nhật", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        getTopicList();
+        loadQuestionData();
+    }, [questionId]);
+
     return (
         <form onSubmit={handleSubmit}>
             <Box sx={{ p: 4, bgcolor: "white", borderRadius: 2 }}>
+                {loading && (
+                    <Box sx={{ position: 'absolute', inset: 0, bgcolor: 'rgba(255,255,255,0.7)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CircularProgress />
+                    </Box>
+                )}
                 <Stack direction="row" justifyContent="space-between" mb={2}>
-                    <Typography variant="h5" fontWeight="bold">Thêm câu hỏi mới</Typography>
+                    <Typography variant="h5" fontWeight="bold">{isEditMode ? `Cập nhật câu hỏi: ${questionId}` : "Thêm câu hỏi mới"}</Typography>
                     <IconButton onClick={() => {
                         handleClearForm();
                         onClose();
@@ -274,6 +321,7 @@ const AddQuestionModal = ({ onClose }: Props) => {
                             onChange={(e) => setContent(e.target.value)}
                             style={{ width: "100%", minHeight: 100, padding: 10, border: "1px solid #000000", borderRadius: 5 }}
                         />
+                        
                     </Grid>
 
                     <Grid size={{ xs: 12, md: 6 }}>
@@ -300,14 +348,36 @@ const AddQuestionModal = ({ onClose }: Props) => {
                             ))}
                         </Stack>
                     </Grid>
+                    <Grid size={{ xs: 12 }}>
+                        <Typography variant="subtitle2">Hình ảnh hiện tại & mới:</Typography>
+                        <Stack direction="row" spacing={1} mt={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+                            {/* Ảnh đã có trên server */}
+                            {existingImages.map((img, i) => (
+                                <Box key={i} sx={{ position: 'relative' }}>
+                                    <img src={import.meta.env.VITE_HOST_URL + img.url} style={{ width: 80, height: 60, objectFit: "cover", borderRadius: 4, border: '2px solid #4caf50' }} alt="existing" />
+                                    <Typography variant="caption" sx={{ position: 'absolute', bottom: 0, left: 0, bgcolor: 'green', color: 'white', px: 0.5 }}>Cũ</Typography>
+                                </Box>
+                            ))}
+                            {/* Ảnh mới chọn */}
+                            {previewImages.map((url, i) => (
+                                <Box key={i} sx={{ position: 'relative' }}>
+                                    <img src={url} style={{ width: 80, height: 60, objectFit: "cover", borderRadius: 4, border: '2px solid #2196f3' }} alt="preview" />
+                                    <Typography variant="caption" sx={{ position: 'absolute', bottom: 0, left: 0, bgcolor: '#2196f3', color: 'white', px: 0.5 }}>Mới</Typography>
+                                </Box>
+                            ))}
+                        </Stack>
+                        <Button variant="outlined" component="label" startIcon={<UploadFileOutlined />} sx={{ mt: 2 }}>
+                            Tải thêm ảnh
+                            <input ref={fileInputRef} type="file" hidden multiple accept="image/*" onChange={handleUpload} />
+                        </Button>
+                    </Grid>
                 </Grid>
 
                 <Stack direction="row" spacing={2} justifyContent="flex-end" mt={4}>
-                    <Button variant="contained" color="error" onClick={() => {
-                        handleClearForm();
-                        onClose();
-                    }}>Hủy bỏ</Button>
-                    <Button variant="contained" color="primary" type="submit">Lưu câu hỏi</Button>
+                    <Button variant="contained" color="error" onClick={() => onClose()}>Hủy bỏ</Button>
+                    <Button variant="contained" color="primary" type="submit" disabled={loading}>
+                        {isEditMode ? "Lưu thay đổi" : "Lưu câu hỏi"}
+                    </Button>
                 </Stack>
             </Box>
         </form>

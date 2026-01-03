@@ -5,12 +5,14 @@ import { UploadFileOutlined, DeleteOutline, Save } from "@mui/icons-material";
 import lessonApiService from "../service/apis/lessonApiService";
 import LatexToolBtnGroup from "../components/ui/LatexToolBtnGroup";
 import FormatAndLatexRender from "./FormatAndLatexRender";
+import type { RefType } from "../types/lessonType";
 
 const EditSectionModal = ({ open, onClose, section }: any) => {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
-    const [newImages, setNewImages] = useState<File[]>([]); 
+    const [newImages, setNewImages] = useState<File[]>([]);
     const [loading, setLoading] = useState(false);
+    const [refs, setRefs] = useState<RefType[]>([]);
 
     const newImagePreviewUrls = useMemo(() => {
         return newImages.map(file => URL.createObjectURL(file));
@@ -20,11 +22,30 @@ const EditSectionModal = ({ open, onClose, section }: any) => {
         return section?.images?.map((img: any) => img.url) || [];
     }, [section]);
 
+    const getYoutubeId = (url: string): string | null => {
+        if (!url) return null;
+        const regex =
+            /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+        return url.match(regex)?.[1] || null;
+    };
+
+    const youtubePreviewId = useMemo(() => {
+        const videoRef = refs.find(r => r.type === "video");
+        return videoRef ? getYoutubeId(videoRef.url) : null;
+    }, [refs]);
+
     useEffect(() => {
         if (section && open) {
             setTitle(section.title || "");
             setContent(section.content || "");
             setNewImages([]);
+            setRefs(
+                section.refs?.map((r: any) => ({
+                    id: r.id,
+                    type: r.type,
+                    url: r.url,
+                })) || []
+            );
         }
     }, [section, open]);
 
@@ -40,19 +61,53 @@ const EditSectionModal = ({ open, onClose, section }: any) => {
         }, 0);
     };
 
+    const addRef = () => {
+        setRefs([...refs, { type: "video", url: "" }]);
+    };
+
+    const updateRef = (index: number, key: keyof RefType, value: string) => {
+        const newRefs = [...refs];
+
+        if (key === "url") {
+            const isYoutube =
+                /youtube\.com|youtu\.be/.test(value);
+            if (isYoutube) newRefs[index].type = "video";
+        }
+
+        newRefs[index][key] = value as any;
+        setRefs(newRefs);
+    };
+
+    const removeRef = (index: number) => {
+        setRefs(refs.filter((_, i) => i !== index));
+    };
+
     const handleUpdate = async () => {
         if (!title.trim()) return alert("Vui lòng nhập tiêu đề!");
         setLoading(true);
-        const res = await lessonApiService.updateSection(section.id, { title, content }, newImages);
+      
+        const payload = {
+          title,
+          content,
+          refs: refs.filter(r => r.url.trim() !== "")
+        };
+      
+        const res = await lessonApiService.updateSection(
+          section.id,
+          payload,
+          newImages
+        );
+      
         setLoading(false);
         if (res.success) onClose(true);
         else alert(res.message);
-    };
+      };
+      
 
     // --- LOGIC RENDER PREVIEW CẬP NHẬT ---
     const SmartPreview = ({ text }: { text: string }) => {
         if (!text) return null;
-        
+
         // Regex bắt: #picN{caption}, #picN, hoặc [CHILD_N]
         const parts = text.split(/(#pic\d+(?:\{.*?\})?|\[CHILD_\d+\])/g);
 
@@ -64,10 +119,10 @@ const EditSectionModal = ({ open, onClose, section }: any) => {
                     if (picMatch) {
                         const imgIdx = parseInt(picMatch[1]) - 1;
                         const caption = picMatch[2] || `Ảnh minh họa ${picMatch[1]}`;
-                        
+
                         // Ưu tiên ảnh mới chọn, nếu không có thì lấy ảnh cũ từ server
-                        const url = newImages.length > 0 
-                            ? newImagePreviewUrls[imgIdx] 
+                        const url = newImages.length > 0
+                            ? newImagePreviewUrls[imgIdx]
                             : (oldImageUrls[imgIdx] ? import.meta.env.VITE_HOST_URL + oldImageUrls[imgIdx] : null);
 
                         return url ? (
@@ -106,7 +161,7 @@ const EditSectionModal = ({ open, onClose, section }: any) => {
                 </Stack>
 
                 <Grid container spacing={4}>
-                    <Grid size={{xs:12, md:6}}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                         <TextField fullWidth label="Tiêu đề" value={title} onChange={e => setTitle(e.target.value)} sx={{ mb: 2 }} />
                         <LatexToolBtnGroup insertLatex={insertText} />
                         <TextField id="edit-section-input" fullWidth multiline rows={12} value={content} onChange={e => setContent(e.target.value)} sx={{ mt: 1, '& .MuiInputBase-root': { fontFamily: 'monospace' } }} />
@@ -124,7 +179,7 @@ const EditSectionModal = ({ open, onClose, section }: any) => {
                                     {newImages.map((_, i) => (
                                         <Box key={i} sx={{ position: 'relative', border: '2px solid #2196f3', p: 0.5, borderRadius: 1 }}>
                                             <img src={newImagePreviewUrls[i]} width={60} height={60} style={{ objectFit: 'cover' }} />
-                                            <Typography variant="caption" sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, bgcolor: 'rgba(33, 150, 243, 0.8)', color: 'white', textAlign: 'center', fontSize: '10px' }}>#pic{i+1}</Typography>
+                                            <Typography variant="caption" sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, bgcolor: 'rgba(33, 150, 243, 0.8)', color: 'white', textAlign: 'center', fontSize: '10px' }}>#pic{i + 1}</Typography>
                                             <IconButton size="small" sx={{ position: 'absolute', top: -10, right: -10, bgcolor: 'white' }} onClick={() => setNewImages(newImages.filter((_, idx) => idx !== i))}><DeleteOutline fontSize="small" color="error" /></IconButton>
                                         </Box>
                                     ))}
@@ -134,15 +189,84 @@ const EditSectionModal = ({ open, onClose, section }: any) => {
                                     {oldImageUrls.map((url: string, i: number) => (
                                         <Box key={i} sx={{ position: 'relative', border: '1px solid #ccc', p: 0.5, borderRadius: 1 }}>
                                             <img src={import.meta.env.VITE_HOST_URL + url} width={60} height={60} style={{ objectFit: 'cover' }} />
-                                            <Typography variant="caption" sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, bgcolor: 'rgba(0,0,0,0.5)', color: 'white', textAlign: 'center', fontSize: '10px' }}>#pic{i+1}</Typography>
+                                            <Typography variant="caption" sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, bgcolor: 'rgba(0,0,0,0.5)', color: 'white', textAlign: 'center', fontSize: '10px' }}>#pic{i + 1}</Typography>
                                         </Box>
                                     ))}
                                 </Stack>
                             )}
+                            {youtubePreviewId && (
+                                <Box
+                                    sx={{
+                                        mb: 3,
+                                        borderRadius: 3,
+                                        overflow: "hidden",
+                                        boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+                                        border: "1px solid #e0e0e0"
+                                    }}
+                                >
+                                    <iframe
+                                        width="100%"
+                                        height="360"
+                                        src={`https://www.youtube.com/embed/${youtubePreviewId}`}
+                                        title="YouTube preview"
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                    />
+                                </Box>
+                            )}
                         </Box>
+                        <Divider sx={{ my: 3 }} />
+
+                        <Typography variant="subtitle1" fontWeight="bold" color="primary">
+                            Tài liệu & Video tham khảo
+                        </Typography>
+
+                        <Stack spacing={2} sx={{ mt: 2 }}>
+                            {refs.map((ref, index) => (
+                                <Paper key={index} variant="outlined" sx={{ p: 2, bgcolor: "#fafafa" }}>
+                                    <Grid container spacing={2} alignItems="center">
+                                        <Grid size={{ xs: 12, md: 3 }}>
+                                            <TextField
+                                                select
+                                                fullWidth
+                                                SelectProps={{ native: true }}
+                                                label="Loại"
+                                                value={ref.type}
+                                                onChange={e => updateRef(index, "type", e.target.value)}
+                                            >
+                                                <option value="video">Video</option>
+                                                <option value="doc">Tài liệu</option>
+                                            </TextField>
+                                        </Grid>
+
+                                        <Grid size={{ xs: 12, md: 8 }}>
+                                            <TextField
+                                                fullWidth
+                                                label="URL"
+                                                value={ref.url}
+                                                onChange={e => updateRef(index, "url", e.target.value)}
+                                                placeholder="https://..."
+                                            />
+                                        </Grid>
+
+                                        <Grid size={{ xs: 12, md: 1 }}>
+                                            <IconButton color="error" onClick={() => removeRef(index)}>
+                                                <DeleteOutline />
+                                            </IconButton>
+                                        </Grid>
+                                    </Grid>
+                                </Paper>
+                            ))}
+
+                            <Button variant="outlined" onClick={addRef}>
+                                + Thêm tài liệu / video
+                            </Button>
+                        </Stack>
+
                     </Grid>
 
-                    <Grid size={{xs:12, md:6}}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                         <Typography variant="subtitle2" color="secondary" gutterBottom fontWeight="bold">XEM TRƯỚC:</Typography>
                         <Paper variant="outlined" sx={{ p: 4, height: 600, overflowY: 'auto', borderRadius: 2 }}>
                             <Typography variant="h4" color="primary" fontWeight="bold">{title || "Tiêu đề"}</Typography>

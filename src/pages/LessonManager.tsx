@@ -12,6 +12,7 @@ import AddSectionModal from "./AddSectionModal";
 import EditSectionModal from "./EditSectionModal";
 import type { LessonSectionType, LessonType } from "../types/lessonType";
 import FormatAndLatexRender from "./FormatAndLatexRender";
+import SectionRefs from "./SectionRefs";
 
 // --- COMPONENT TRỢ GIÚP: RENDER NỘI DUNG THÔNG MINH ---
 const SmartContentRender = ({ section, onRefresh, onAddChild }: {
@@ -120,7 +121,8 @@ const SectionItem = ({ section, onRefresh, onAddChild }: {
             </Stack>
 
             <SmartContentRender section={section} onRefresh={onRefresh} onAddChild={onAddChild} />
-
+            <SectionRefs refs={section.refs} />
+            
             <EditSectionModal
                 open={editModalOpen}
                 section={section}
