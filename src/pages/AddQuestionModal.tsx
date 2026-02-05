@@ -80,6 +80,7 @@ const AddQuestionModal = ({ onClose, questionId }: Props) => {
             answerMp: questionType === "mp" ? mpAnswers : [],
             answerFns: questionType === "fns" ? { answer: fnsAnswer } : null,
         };
+        console.log(questionDto)
 
         formData.append(
             "question",
@@ -92,6 +93,7 @@ const AddQuestionModal = ({ onClose, questionId }: Props) => {
             if (isEditMode && questionId) {
                 await questionApiService.update(questionId,formData);
             } else {
+                console.log("gửi API")
                 await questionApiService.create(formData);
             }
             onClose(isEditMode ? "Cập nhật thành công!" : "Thêm mới thành công!", true);
@@ -175,8 +177,8 @@ const AddQuestionModal = ({ onClose, questionId }: Props) => {
             case "fn":
                 return (
                     <Stack direction="row" spacing={2}>
-                        <TextField label="Con số đúng" type="number" fullWidth onChange={(e) => setFnAnswer({ ...fnAnswer, answer: Number(e.target.value) })} />
-                        <TextField label="Sai số cho phép" type="number" fullWidth onChange={(e) => setFnAnswer({ ...fnAnswer, tolerance: Number(e.target.value) })} />
+                        <TextField label="Con số đúng" fullWidth value={fnAnswer.answer} InputLabelProps={{ shrink: true }} onChange={(e) => setFnAnswer({ ...fnAnswer, answer: Number(e.target.value) })} />
+                        <TextField label="Sai số cho phép" fullWidth value={fnAnswer.tolerance} InputLabelProps={{ shrink: true }} onChange={(e) => setFnAnswer({ ...fnAnswer, tolerance: Number(e.target.value) })} />
                     </Stack>
                 );
             case "mp":
@@ -185,12 +187,18 @@ const AddQuestionModal = ({ onClose, questionId }: Props) => {
                         <Typography variant="subtitle2">Cặp nối (Cột 1 nối với Cột 2):</Typography>
                         {mpAnswers.map((_, index) => (
                             <Stack key={index} direction="row" spacing={2}>
-                                <TextField label="Vế A" fullWidth size="small" onChange={(e) => {
+                                <TextField label="Vế A" fullWidth size="small"
+                                value={mpAnswers[index].column1}
+                                InputLabelProps={{ shrink: true }}
+                                onChange={(e) => {
                                     const newAns = [...mpAnswers];
                                     newAns[index].column1 = e.target.value;
                                     setMpAnswers(newAns);
                                 }} />
-                                <TextField label="Vế B" fullWidth size="small" onChange={(e) => {
+                                <TextField label="Vế B" fullWidth size="small" 
+                                value={mpAnswers[index].column2}
+                                InputLabelProps={{ shrink: true }}
+                                onChange={(e) => {
                                     const newAns = [...mpAnswers];
                                     newAns[index].column2 = e.target.value;
                                     setMpAnswers(newAns);
@@ -201,12 +209,12 @@ const AddQuestionModal = ({ onClose, questionId }: Props) => {
                     </Stack>
                 );
             case "fns":
-                return <TextField label="Chuỗi số (Ví dụ: [1,2,3])" fullWidth onChange={(e) => setFnsAnswer(e.target.value)} />;
+                return <TextField label="Chuỗi số (Ví dụ: [1,2,3])" fullWidth InputLabelProps={{ shrink: true }} value={fnsAnswer} onChange={(e) => setFnsAnswer(e.target.value)} />;
             case "fs":
                 return (
                     <Stack spacing={2}>
-                        <TextField label="Từ khóa đúng" fullWidth onChange={(e) => setFsAnswer({ ...fsAnswer, answer: e.target.value })} />
-                        <TextField label="Từ đồng nghĩa (cách nhau bởi dấu phẩy)" fullWidth onChange={(e) => setFsAnswer({ ...fsAnswer, synonyms: e.target.value })} />
+                        <TextField label="Từ khóa đúng" fullWidth InputLabelProps={{ shrink: true }} value={fsAnswer.answer} onChange={(e) => setFsAnswer({ ...fsAnswer, answer: e.target.value })} />
+                        <TextField label="Từ đồng nghĩa (cách nhau bởi dấu phẩy)" fullWidth InputLabelProps={{ shrink: true }} value={fsAnswer.synonyms} onChange={(e) => setFsAnswer({ ...fsAnswer, synonyms: e.target.value })} />
                     </Stack>
                 );
             default: return null;
@@ -231,6 +239,7 @@ const AddQuestionModal = ({ onClose, questionId }: Props) => {
                     setSelectedBloom(q.bloom);
                     setExistingImages(q.questionImgs || []);
                     
+                    console.log(res)
                     // Map đáp án tương ứng
                     if (q.questionType === 'mcq') setMcqAnswers(q.mcqAnswers);
                     if (q.questionType === 'fn') setFnAnswer(q.fnAnswers[0] || { answer: 0, tolerance: 0 });
