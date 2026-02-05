@@ -111,7 +111,6 @@ const TopicManager = () => {
                             <TableCell />
                             <TableCell align="left" sx={{whiteSpace:"nowrap"}}>ID</TableCell>
                             <TableCell align="left" sx={{whiteSpace:"nowrap"}}>Tiêu đề</TableCell>
-                            <TableCell align="left" sx={{whiteSpace:"nowrap"}}>Mô tả</TableCell>
                             <TableCell align="left" sx={{whiteSpace:"nowrap"}}>Trạng thái</TableCell>
                             <TableCell align="left" sx={{whiteSpace:"nowrap"}}>Số màn</TableCell>
                             <TableCell align="left" sx={{whiteSpace:"nowrap"}}>Thứ tự</TableCell>

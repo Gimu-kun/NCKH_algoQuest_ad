@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { questType } from "../types/questType";
-import { Alert, Backdrop, Button, Chip, Paper, Snackbar, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Alert, Backdrop, Button, Chip, Paper, Snackbar, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from "@mui/material";
 import questApiService from "../service/apis/questApiService";
 import formatDate from "../service/utils/dataFormat";
 import AddQuestModal from "./AddQuestModal";
@@ -118,9 +118,7 @@ const QuestManager = () => {
                                     <TableCell align="left" sx={{ whiteSpace: "nowrap" }}>ID</TableCell>
                                     <TableCell align="left" sx={{ whiteSpace: "nowrap" }}>ID chương</TableCell>
                                     <TableCell align="left" sx={{ whiteSpace: "nowrap" }}>Tiêu đề</TableCell>
-                                    <TableCell align="left" sx={{ whiteSpace: "nowrap" }}>Mô tả</TableCell>
                                     <TableCell align="left" sx={{ whiteSpace: "nowrap" }}>Trạng thái</TableCell>
-                                    <TableCell align="left" sx={{ whiteSpace: "nowrap" }}>Kiểu màn chơi</TableCell>
                                     <TableCell align="left" sx={{ whiteSpace: "nowrap" }}>Thứ tự</TableCell>
                                     <TableCell align="left" sx={{ whiteSpace: "nowrap" }}>Tạo lúc</TableCell>
                                     <TableCell align="left" sx={{ whiteSpace: "nowrap" }}>Cập nhật lúc</TableCell>
@@ -143,8 +141,22 @@ const QuestManager = () => {
                                         <TableRow key={row.id}>
                                             <TableCell align="left" sx={{ whiteSpace: "nowrap" }}>{row.id}</TableCell>
                                             <TableCell align="left" sx={{ whiteSpace: "nowrap" }}>{row.topicId}</TableCell>
-                                            <TableCell align="left">{row.title}</TableCell>
-                                            <TableCell align="left">{row.decs}</TableCell>
+                                            <TableCell align="left">
+                                                <Tooltip
+                                                    title={row.decs || "Không có mô tả"}
+                                                    arrow
+                                                    placement="top"
+                                                >
+                                                    <Typography
+                                                    sx={{
+                                                        cursor: "help",
+                                                        textDecoration: "underline dotted",
+                                                    }}
+                                                    >
+                                                    {row.title}
+                                                    </Typography>
+                                                </Tooltip>
+                                            </TableCell>
                                             <TableCell align="left">
                                                 <Chip label={row.status ? "Hoạt động" : "Tạm ngưng"} color={row.status ? "success" : "error"} size="medium" />
                                             </TableCell>

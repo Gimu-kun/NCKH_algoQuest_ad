@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Collapse, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Button, Chip, Collapse, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from "@mui/material";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import formatDate from "../service/utils/dataFormat";
@@ -23,8 +23,22 @@ const TopicRow = ({ topic, onEdit, onAddQuest }: TopicRowProps) => {
                     </IconButton>
                 </TableCell>
                 <TableCell sx={{whiteSpace:"nowrap"}}>{topic.id}</TableCell>
-                <TableCell>{topic.title}</TableCell>
-                <TableCell>{topic.description}</TableCell>
+                <TableCell>
+                    <Tooltip
+                        title={topic.description || "Không có mô tả"}
+                        arrow
+                        placement="top"
+                    >
+                        <Typography
+                        sx={{
+                            cursor: "help",
+                            textDecoration: "underline dotted",
+                        }}
+                        >
+                        {topic.title}
+                        </Typography>
+                    </Tooltip>
+                </TableCell>
                 <TableCell>
                     <Chip label={topic.status ? "Hoạt động" : "Tạm ngưng"} color={topic.status ? "success" : "error"} size="medium" />
                 </TableCell>
@@ -54,9 +68,7 @@ const TopicRow = ({ topic, onEdit, onAddQuest }: TopicRowProps) => {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell align="left">ID</TableCell>
-                                        <TableCell align="left">Kiểu</TableCell>
                                         <TableCell align="left">Tiêu đề</TableCell>
-                                        <TableCell align="left">Mô tả</TableCell>
                                         <TableCell align="left">Trạng thái</TableCell>
                                         <TableCell align="left">Thứ tự</TableCell>
                                         <TableCell align="left">Tạo lúc</TableCell>
@@ -77,9 +89,22 @@ const TopicRow = ({ topic, onEdit, onAddQuest }: TopicRowProps) => {
                                         topic.quests.map(q => (
                                             <TableRow key={q.id}>
                                                 <TableCell sx={{whiteSpace:"nowrap"}}>{q.id}</TableCell>
-                                                <TableCell>{q.questType}</TableCell>
-                                                <TableCell>{q.title}</TableCell>
-                                                <TableCell>{q.description}</TableCell>
+                                                <TableCell>
+                                                <Tooltip
+                                                    title={q.description || "Không có mô tả"}
+                                                    arrow
+                                                    placement="top"
+                                                >
+                                                    <Typography
+                                                    sx={{
+                                                        cursor: "help",
+                                                        textDecoration: "underline dotted",
+                                                    }}
+                                                    >
+                                                    {q.title}
+                                                    </Typography>
+                                                </Tooltip>
+                                                </TableCell>
                                                 <TableCell>
                                                     <Chip label={q.status ? "Hoạt động" : "Tạm ngưng"} color={q.status ? "success" : "error"} size="medium" />
                                                 </TableCell>

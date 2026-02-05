@@ -1,10 +1,10 @@
-import { Backdrop, Box, Button, Collapse, Divider, IconButton, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Tooltip } from "@mui/material";
+import { Backdrop, Box, Button, Collapse, Divider, IconButton, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Tooltip, Grid } from "@mui/material";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import formatDate from "../service/utils/dataFormat";
 import lessonApiService from "../service/apis/lessonApiService";
 import AddLessonModal from "./AddLessonModal";
@@ -13,6 +13,151 @@ import EditSectionModal from "./EditSectionModal";
 import type { LessonSectionType, LessonType } from "../types/lessonType";
 import FormatAndLatexRender from "./FormatAndLatexRender";
 import SectionRefs from "./SectionRefs";
+import { ChevronRight, ExpandMore } from "@mui/icons-material";
+
+const SidebarItem = ({ 
+    item, 
+    expandedIds, 
+    toggleExpand 
+}: { 
+    item: LessonSectionType, 
+    expandedIds: Set<string>, 
+    toggleExpand: (id: string) => void 
+}) => {
+    const hasChildren = item.children && item.children.length > 0;
+    const isExpanded = expandedIds.has(item.id);
+
+    return (
+        <Box>
+            <Stack 
+                direction="row" 
+                alignItems="center" 
+                spacing={0.5}
+                sx={{ 
+                    cursor: 'pointer',
+                    py: 0.5,
+                    borderRadius: 1,
+                    '&:hover': { bgcolor: '#f0f0f0' },
+                    pl: (item.level - 1) * 2
+                }}
+            >
+                {/* Nút Đóng/Mở mục con */}
+                <Box 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (hasChildren) toggleExpand(item.id);
+                    }}
+                    sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        visibility: hasChildren ? 'visible' : 'hidden',
+                        color: 'text.secondary'
+                    }}
+                >
+                    {isExpanded ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
+                </Box>
+
+                {/* Tiêu đề mục - Click để cuộn tới nội dung */}
+                <Typography 
+                    variant="body2" 
+                    onClick={() => document.getElementById(`section-${item.id}`)?.scrollIntoView({ behavior: 'smooth' })}
+                    sx={{ 
+                        flexGrow: 1,
+                        fontSize: '0.9rem',
+                        fontWeight: item.level === 1 ? 'bold' : 'normal',
+                        color: isExpanded && hasChildren ? 'primary.main' : 'text.primary'
+                    }}
+                >
+                    {item.title}
+                </Typography>
+            </Stack>
+
+            {/* Render con nếu đang mở rộng */}
+            {hasChildren && isExpanded && (
+                <Box>
+                    {item.children?.map(child => (
+                        <SidebarItem 
+                            key={child.id} 
+                            item={child} 
+                            expandedIds={expandedIds} 
+                            toggleExpand={toggleExpand} 
+                        />
+                    ))}
+                </Box>
+            )}
+        </Box>
+    );
+};
+
+const LessonDetailView = ({ row, onRefresh, onAddChild }: { 
+    row: LessonType, 
+    onRefresh: () => void,
+    onAddChild: (pid: string | null, lvl: number) => void 
+}) => {
+
+    // State quản lý các mục đang mở (mặc định mở hết các mục level 1)
+    const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(
+        row.sections?.filter(s => s.level === 1).map(s => s.id)
+    ));
+
+    const toggleExpand = (id: string) => {
+        const newSet = new Set(expandedIds);
+        if (newSet.has(id)) {
+            newSet.delete(id);
+        } else {
+            newSet.add(id);
+        }
+        setExpandedIds(newSet);
+    };
+
+    const sortedSection = row.sections?.sort((a, b) => a.orderIndex - b.orderIndex);
+
+    return (
+        <Grid container spacing={2} sx={{overflowY: 'auto', height: '80vh', mt: 2 }}>
+            {/* CỘT TRÁI: DANH MỤC (TREE VIEW) */}
+            <Grid size={{xs: 2.5}} sx={{ borderRight: '1px solid #eee', overflowY: 'auto', pr: 1 }}>
+                <Typography variant="overline" fontWeight="700" color="primary" mb={2} display="block">
+                    Cấu trúc bài học
+                </Typography>
+                <Stack spacing={0.5}>
+                    {sortedSection?.filter(sec => !sec.parentId).map(sec => (
+                        <SidebarItem 
+                            key={sec.id} 
+                            item={sec} 
+                            expandedIds={expandedIds} 
+                            toggleExpand={toggleExpand} 
+                        />
+                    ))}
+                    
+                    <Button 
+                        size="small" 
+                        startIcon={<AddIcon />} 
+                        onClick={() => onAddChild(null, 1)}
+                        sx={{ mt: 2, textTransform: 'none', justifyContent: 'flex-start' }}
+                    >
+                        Thêm mục lớn
+                    </Button>
+                </Stack>
+            </Grid>
+
+            {/* CỘT GIỮA: NỘI DUNG CHÍNH (SCROLL) */}
+            <Grid size={{xs: 9.5}} sx={{height: '80vh', overflowY: 'auto', px: 4, bgcolor: '#fff' }} id="main-content-scroll">
+                <Typography variant="h3" fontWeight="800" gutterBottom>{row.title}</Typography>
+                <Divider sx={{ mb: 4 }} />
+                
+                {sortedSection.filter(sec => !sec.parentId).map(sec => (
+                    <Box key={sec.id} id={`section-${sec.id}`}>
+                        <SectionItem 
+                            section={sec} 
+                            onRefresh={onRefresh}
+                            onAddChild={onAddChild}
+                        />
+                    </Box>
+                ))}
+            </Grid>
+        </Grid>
+    );
+};
 
 // --- COMPONENT TRỢ GIÚP: RENDER NỘI DUNG THÔNG MINH ---
 const SmartContentRender = ({ section, onRefresh, onAddChild }: {
@@ -53,7 +198,7 @@ const SmartContentRender = ({ section, onRefresh, onAddChild }: {
                     const child = children && children[childIdx];
 
                     return child ? (
-                        <Box key={index} sx={{ my: 2 }}>
+                        <Box key={index} sx={{ my: 2 }} id={`section-${child.id}`}>
                             <SectionItem section={child} onRefresh={onRefresh} onAddChild={onAddChild} />
                         </Box>
                     ) : (
@@ -170,22 +315,16 @@ const Row = ({ row, onRefresh }: { row: LessonType, onRefresh: () => void }) => 
                 </TableCell>
             </TableRow>
             <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={9}>
                     <Collapse in={open} timeout="auto" unmountOnExit>
-                        <Box sx={{ m: 2, p: 3, bgcolor: '#fafafa', borderRadius: 2, border: '1px solid #eee' }}>
-                            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-                                <Typography variant="h6" fontWeight="bold">Cấu trúc bài giảng</Typography>
-                                <Button variant="contained" size="small" startIcon={<AddIcon />}
-                                    onClick={() => setSectionModal({ open: true, parentId: null, level: 1 })}
-                                >Thêm mục lớn (H1)</Button>
-                            </Stack>
-                            <Divider sx={{ mb: 3 }} />
-                            {row.sections?.sort((a, b) => a.orderIndex - b.orderIndex).filter(sec => !sec.parentId).map(sec => (
-                                <SectionItem key={sec.id} section={sec} onRefresh={onRefresh}
-                                    onAddChild={(pid, lvl) => setSectionModal({ open: true, parentId: pid, level: lvl })}
-                                />
-                            ))}
-                        </Box>
+                        <Paper sx={{ m: 2, p: 2, border: '1px solid #eee', borderRadius: 4 }}>
+                            {/* Gọi Component View 3 cột mới ở đây */}
+                            <LessonDetailView 
+                                row={row} 
+                                onRefresh={onRefresh} 
+                                onAddChild={(pid, lvl) => setSectionModal({ open: true, parentId: pid, level: lvl })}
+                            />
+                        </Paper>
                     </Collapse>
                 </TableCell>
             </TableRow>
@@ -228,14 +367,14 @@ const LessonManager = () => {
                     <TableHead sx={{ bgcolor: '#f5f7f9' }}>
                         <TableRow>
                             <TableCell width="60px" />
-                            <TableCell>Mã số</TableCell>
-                            <TableCell>Tiêu đề</TableCell>
-                            <TableCell>Chương</TableCell>
-                            <TableCell>Ngày tạo</TableCell>
-                            <TableCell>Ngày cập nhật</TableCell>
-                            <TableCell>Người tạo</TableCell>
-                            <TableCell>Người cập nhật</TableCell>
-                            <TableCell width="100px">Thao tác</TableCell>
+                            <TableCell sx={{whiteSpace:'nowrap'}}>Mã số</TableCell>
+                            <TableCell sx={{whiteSpace:'nowrap'}}>Tiêu đề</TableCell>
+                            <TableCell sx={{whiteSpace:'nowrap'}}>Chương</TableCell>
+                            <TableCell sx={{whiteSpace:'nowrap'}}>Ngày tạo</TableCell>
+                            <TableCell sx={{whiteSpace:'nowrap'}}>Ngày cập nhật</TableCell>
+                            <TableCell sx={{whiteSpace:'nowrap'}}>Người tạo</TableCell>
+                            <TableCell sx={{whiteSpace:'nowrap'}}>Người cập nhật</TableCell>
+                            <TableCell width="100px" sx={{whiteSpace:'nowrap'}}>Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
